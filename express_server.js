@@ -21,6 +21,18 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies['username']
+  }
+  res.render("user_registration", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  console.log("Need to populate this page !")
+});
+
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
