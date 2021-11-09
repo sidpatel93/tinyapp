@@ -1,6 +1,5 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
-const { application } = require("express");
 //const bodyParser = require('body-parser')
 
 const app = express();
@@ -12,6 +11,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
 
+// Application Data
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -30,10 +30,12 @@ const users = {
   }
 };
 
-
+// Routes
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+
+//======== User Registration route ========
 
 app.get("/register", (req, res) => {
   const user_cookie = req.cookies.user_id;
@@ -78,6 +80,7 @@ app.post("/register", (req, res) => {
 
 });
 
+//======== URLs routes ========
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -142,8 +145,6 @@ app.post('/urls/:id', (req, res) => {
   res.redirect('/urls');
 });
 
-
-
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if (shortURL in urlDatabase) {
@@ -159,6 +160,20 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     res.redirect('/urls');
   }
 });
+
+
+//======== Login and Logout routes ========
+
+app.get('/login', (req, res) => {
+  const user_cookie = req.cookies.user_id;
+  const user = users[user_cookie];
+  const templateVars = {
+    user
+  }
+  res.render('login_page', templateVars)
+})
+
+
 
 app.post('/login',(req, res) => {
   const userName = req.body.username;
@@ -190,6 +205,8 @@ app.get("/set", (req, res) => {
 app.get("/fetch", (req, res) => {
   res.send(`a = ${a}`);
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
