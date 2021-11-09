@@ -64,12 +64,13 @@ app.post("/register", (req, res) => {
   
   if(!newUser.email || !newUser.password){
     //console.log("email or password empty")
-    res.sendStatus(400)
+    res.status(400).send("email and password can not be empty")
+    
   }
 
   else if(emailLookUP(newUser.email)){
     //console.log("email already exist")
-    res.sendStatus(400)
+    res.status(400).send("email already exist")
   }
   
   else {
@@ -127,16 +128,25 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+
 app.get("/urls", (req, res) => {
   const user_cookie = req.cookies.user_id;
   const user = users[user_cookie];
 
-  const templateVars = {
-    urls: urlDatabase,
-    user
-  };
-  res.render("urls_index", templateVars);
+  //Check if the user is logged in
+  if(user_cookie){
+    const authorizedURLs = getAuthorizesURLs(user_cookie)
+    //console.log(authorizedURLs)
+    const templateVars = {
+      urls: authorizedURLs,
+      user
+    };
+    res.render("urls_index", templateVars);
+  } else {
+    res.redirect('/login')
+  }
 });
+
 
 app.post("/urls", (req, res) => {
   
@@ -154,18 +164,18 @@ app.post("/urls", (req, res) => {
     const longURL = req.body['longURL'];
 
     // add the shortURL - longURL paris in the database
-    console.log(shortURL)
+    //console.log(shortURL)
     urlDatabase[shortURL] = {}
     urlDatabase[shortURL]['longURL'] = longURL;
     urlDatabase[shortURL]['userID'] = user_cookie
-    console.log(urlDatabase)
+    //console.log(urlDatabase)
     res.redirect(`/urls/${shortURL}`);
   }
 });
 
 app.post('/urls/:id', (req, res) => {
 
-  console.log(req.body);
+  //console.log(req.body);
   const shortURL = req.params.id;
   const longURL = req.body.newLongURL;
   urlDatabase[shortURL]['longURL'] = longURL;
@@ -274,4 +284,14 @@ function getUserId(email){
       return users[user].id
     }
   }
+}
+
+function getAuthorizesURLs(userID){
+  const authorizedURLs = {}
+  for(url in urlDatabase){
+    if(urlDatabase[url]['userID'] === userID){
+      authorizedURLs[url] = urlDatabase[url]
+    }
+  }
+  return authorizedURLs
 }
