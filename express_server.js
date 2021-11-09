@@ -198,14 +198,10 @@ app.post('/login',(req, res) => {
 
 });
 
-app.post('/logout',(req, res) => {
-  //const userName = req.body.username
-  //console.log(userName)
+app.get('/logout',(req, res) => {
   res.clearCookie("user_id");
   res.redirect('/urls');
 });
-
-
 
 
 
