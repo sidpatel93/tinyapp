@@ -47,15 +47,15 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   //get the user info from the registration page
   const newUser = req.body;
-  console.log("newUser", newUser)
+  //console.log("newUser", newUser)
   
   if(!newUser.email || !newUser.password){
-    console.log("email or password empty")
+    //console.log("email or password empty")
     res.sendStatus(400)
   }
 
   else if(emailLookUP(newUser.email)){
-    console.log("email already exist")
+    //console.log("email already exist")
     res.sendStatus(400)
   }
   
@@ -69,7 +69,7 @@ app.post("/register", (req, res) => {
     password: req.body['password']
   };
   //console.log the user object & inspect the cookie to see the change
-  console.log(users);
+  //console.log(users);
   // set the userid cookie.
   res.cookie('user_id', userId);
   //redirect to /urls page
@@ -204,11 +204,11 @@ function generateRandomString() {
 
 function emailLookUP(email){
   for(user in users){
-    if(user.email == email){
+    // console.log(user)
+    // console.log(`The user's email is ${users[user].email} and email to compare ${email}`)
+    if(users[user].email === email){
       return true
     }
-    else{
-       return false
-    }
   }
+  return false
 }
