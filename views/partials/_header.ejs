@@ -11,7 +11,7 @@
       </div>
     </div>
     <% if(user) { %>
-      <a class="navbar-brand" href="/register">Logged in As: <%= user.email %> </a>
+      <a class="navbar-brand" href="#">Logged in As: <%= user.email %> </a>
       <a type='button' href="/logout" class="btn btn-primary">Logout</a>
     <% } else { %>
       <a class="navbar-brand" href="/register">Register</a>

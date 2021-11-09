@@ -117,7 +117,6 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     user
   };
-  console.log();
   res.render("urls_index", templateVars);
 });
 
@@ -179,23 +178,22 @@ app.post('/login',(req, res) => {
   const user = req.body;
   console.log(user)
   // check if the user exist in the database
+  
+  if(emailLookUP(user.email)){
+    const userID = getUserId(user.email)
+    console.log(userID)
 
-  if(!emailLookUP(user.email)){
-    res.sendStatus(403)
+    if(users[userID]['password'] !== user.password){
+      res.status(403).send('Email and Password does not match')
+    }
+    else {
+    res.cookie("user_id", userID);
+    res.redirect('/urls');
+    }
   }
-
-  const userID = getUserId(user.email)
-
-  console.log(userID)
-
-  if(users[userID]['password'] !== user.password){
-    res.sendStatus(403)
+  else{
+    res.status(403).send('Email Does not Exist')
   }
-  else {
-  res.cookie("user_id", userID);
-  res.redirect('/urls');
-  }
-
 });
 
 app.get('/logout',(req, res) => {
