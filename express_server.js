@@ -1,5 +1,6 @@
 const express = require("express");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const { application } = require("express");
 //const bodyParser = require('body-parser')
 
 const app = express();
@@ -85,6 +86,18 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     res.redirect('/urls')
   }
 })
+
+app.post('/login',(req, res) => {
+  const userName = req.body.username
+  console.log(userName)
+  res.cookie("username", userName)
+  res.redirect('/urls')
+})
+
+
+
+
+
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
