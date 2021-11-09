@@ -99,6 +99,12 @@ app.post('/login',(req, res) => {
   res.redirect('/urls')
 })
 
+app.post('/logout',(req, res) => {
+  //const userName = req.body.username
+  //console.log(userName)
+  res.clearCookie("username")
+  res.redirect('/urls')
+})
 
 
 
