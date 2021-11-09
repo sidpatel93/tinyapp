@@ -12,9 +12,20 @@ app.use(cookieParser());
 
 
 // Application Data
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
 };
 
 const users = {
@@ -87,13 +98,18 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const user_cookie = req.cookies.user_id;
-  const user = users[user_cookie];
-  const templateVars = {
-    user
-  };
+  // check if the user is logged in or not if not then redirect to login page
   
-  res.render("urls_new", templateVars);
+  if(!req.cookies.user_id){
+    res.redirect('/login')
+  } else {
+    const user_cookie = req.cookies.user_id;
+    const user = users[user_cookie];
+    const templateVars = {
+      user
+    };
+    res.render("urls_new", templateVars);
+  }
 });
 
 
@@ -101,9 +117,11 @@ app.get("/urls/:shortURL", (req, res) => {
   const user_cookie = req.cookies.user_id;
   const user = users[user_cookie];
 
+  const shortURL = req.params.shortURL
+  const longURL = urlDatabase[shortURL]['longURL']
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: longURL,
     user
   };
   res.render("urls_show", templateVars);
@@ -122,17 +140,27 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   
-  // generate short url
-  const shortURL = generateRandomString();
-  const longURL = req.body['longURL'];
-  // add the shortURL - longURL paris in the database
-  urlDatabase[shortURL] = longURL;
-  
-  const templateVars = {
-    shortURL,
-    longURL
-  };
-  res.redirect(`/urls/${shortURL}`);
+  // Add validation to check the user is logged in
+  const user_cookie = req.cookies.user_id;
+  const user = users[user_cookie];
+
+  if(!user_cookie){
+    res.status(403).send("You need to logged in to create a url")
+  }
+  else {
+      // generate short url
+    const shortURL = generateRandomString();
+    
+    const longURL = req.body['longURL'];
+
+    // add the shortURL - longURL paris in the database
+    console.log(shortURL)
+    urlDatabase[shortURL] = {}
+    urlDatabase[shortURL]['longURL'] = longURL;
+    urlDatabase[shortURL]['userID'] = user_cookie
+    console.log(urlDatabase)
+    res.redirect(`/urls/${shortURL}`);
+  }
 });
 
 app.post('/urls/:id', (req, res) => {
@@ -140,14 +168,14 @@ app.post('/urls/:id', (req, res) => {
   console.log(req.body);
   const shortURL = req.params.id;
   const longURL = req.body.newLongURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL]['longURL'] = longURL;
   res.redirect('/urls');
 });
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if (shortURL in urlDatabase) {
-    const longURL = urlDatabase[shortURL];
+    const longURL = urlDatabase[shortURL][longURL];
     res.redirect(longURL);
   }
 });
