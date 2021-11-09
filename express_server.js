@@ -176,10 +176,26 @@ app.get('/login', (req, res) => {
 
 
 app.post('/login',(req, res) => {
-  const userName = req.body.username;
-  //console.log(userName)
-  res.cookie("username", userName);
+  const user = req.body;
+  console.log(user)
+  // check if the user exist in the database
+
+  if(!emailLookUP(user.email)){
+    res.sendStatus(403)
+  }
+
+  const userID = getUserId(user.email)
+
+  console.log(userID)
+
+  if(users[userID]['password'] !== user.password){
+    res.sendStatus(403)
+  }
+  else {
+  res.cookie("user_id", userID);
   res.redirect('/urls');
+  }
+
 });
 
 app.post('/logout',(req, res) => {
@@ -228,4 +244,12 @@ function emailLookUP(email){
     }
   }
   return false
+}
+
+function getUserId(email){
+  for(user in users){
+    if(users[user].email === email){
+      return users[user].id
+    }
+  }
 }
