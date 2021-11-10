@@ -134,7 +134,9 @@ app.get("/urls", (req, res) => {
   const user = users[user_cookie];
 
   //Check if the user is logged in
-  if(user_cookie){
+  if(user_cookie in users){
+    console.log(user_cookie)
+    console.log(user)
     const authorizedURLs = getAuthorizesURLs(user_cookie)
     //console.log(authorizedURLs)
     const templateVars = {
