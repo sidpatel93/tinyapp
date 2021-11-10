@@ -64,13 +64,22 @@ app.post("/register", (req, res) => {
   
   if(!newUser.email || !newUser.password){
     //console.log("email or password empty")
-    res.status(400).send("email and password can not be empty")
+    const errorMessage = {
+      errorTitle: "Invalid values",
+      errorDescription: "Email and Password can not be empty, Please try to register again.",
+      route: "register"
+    }
+    res.status(400).render("error_page",errorMessage)
     
   }
 
   else if(emailLookUP(newUser.email)){
-    //console.log("email already exist")
-    res.status(400).send("email already exist")
+    const errorMessage = {
+      errorTitle: "Invalid values",
+      errorDescription: "Email already exist, please try another valid email address to register or login with existing email.",
+      route: "register"
+    }
+    res.status(400).render("error_page",errorMessage)
   }
   
   else {
@@ -100,9 +109,16 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   // check if the user is logged in or not if not then redirect to login page
-  
+   
+
   if(!req.cookies.user_id){
-    res.redirect('/login')
+    //res.redirect('/login')
+    const errorMessage = {
+      errorTitle: "Unauthorized access",
+      errorDescription: "You need to be logged in to perform this action, Please login with valid credentials and try again ",
+      route: "login"
+    }
+    res.status(403).render("error_page",errorMessage)
   } else {
     const user_cookie = req.cookies.user_id;
     const user = users[user_cookie];
@@ -130,13 +146,13 @@ app.get("/urls/:shortURL", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
+  
   const user_cookie = req.cookies.user_id;
   const user = users[user_cookie];
 
   //Check if the user is logged in
   if(user_cookie in users){
-    console.log(user_cookie)
-    console.log(user)
+   
     const authorizedURLs = getAuthorizesURLs(user_cookie)
     //console.log(authorizedURLs)
     const templateVars = {
@@ -145,7 +161,7 @@ app.get("/urls", (req, res) => {
     };
     res.render("urls_index", templateVars);
   } else {
-    res.redirect('/login')
+    res.status(403).redirect("/login")
   }
 });
 
@@ -157,7 +173,12 @@ app.post("/urls", (req, res) => {
   const user = users[user_cookie];
 
   if(!user_cookie){
-    res.status(403).send("You need to logged in to create a url")
+    const errorMessage = {
+      errorTitle: "Unauthorized access",
+      errorDescription: "You need to be logged in to perform this action, Please login with valid credentials and try again ",
+      route: "login"
+    }
+    res.status(403).render("error_page",errorMessage)
   }
   else {
       // generate short url
@@ -176,12 +197,26 @@ app.post("/urls", (req, res) => {
 });
 
 app.post('/urls/:id', (req, res) => {
-
-  //console.log(req.body);
+  
+  const user_cookie = req.cookies.user_id;
+  const authorizedURLs = getAuthorizesURLs(user_cookie)
   const shortURL = req.params.id;
   const longURL = req.body.newLongURL;
-  urlDatabase[shortURL]['longURL'] = longURL;
-  res.redirect('/urls');
+
+  if(shortURL in authorizedURLs){
+    urlDatabase[shortURL]['longURL'] = longURL;
+    res.redirect('/urls');
+  }
+  else{
+    // redirect to error message showing user is not authorized !
+    const errorMessage = {
+      errorTitle: "Unauthorized access",
+      errorDescription: "You are not authorized to perform this action, Please login with valid credentials and try again ",
+      route: "login"
+    }
+    res.status(403).render('error_page', errorMessage)
+  }
+
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -192,11 +227,26 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
-app.post('/urls/:shortURL/delete', (req, res) => {
-  const shortURL = req.params.shortURL;
-  if (shortURL in urlDatabase) {
-    delete urlDatabase[shortURL];
-    res.redirect('/urls');
+app.post('/urls/:id/delete', (req, res) => {
+  // check if the user has authorize to delete the url by comparing user cookie with the authorized urls
+  const user_cookie = req.cookies.user_id;
+  const authorizedURLs = getAuthorizesURLs(user_cookie)
+  const shortURL = req.params.id;
+  
+  if(shortURL in authorizedURLs){
+    if (shortURL in urlDatabase) {
+      delete urlDatabase[shortURL];
+      res.redirect('/urls');
+    }
+  }
+  else {
+     // redirect to error message showing user is not authorized !
+     const errorMessage = {
+      errorTitle: "Unauthorized access",
+      errorDescription: "You are not authorized to perform this action, Please login with valid credentials and try again ",
+      route: "login"
+    }
+    res.status(403).render('error_page', errorMessage)
   }
 });
 
@@ -213,15 +263,14 @@ app.get('/login', (req, res) => {
 })
 
 
-
 app.post('/login',(req, res) => {
   const user = req.body;
-  console.log(user)
+  //console.log(user)
   // check if the user exist in the database
   
   if(emailLookUP(user.email)){
     const userID = getUserId(user.email)
-    console.log(userID)
+    //console.log(userID)
 
     if(users[userID]['password'] !== user.password){
       res.status(403).send('Email and Password does not match')
@@ -232,7 +281,12 @@ app.post('/login',(req, res) => {
     }
   }
   else{
-    res.status(403).send('Email Does not Exist')
+    const errorMessage = {
+      errorTitle: "Invalid Credentials",
+      errorDescription: "Email or Password you entered is not valid, please try login again",
+      route: "login"
+    }
+    res.render('error_page', errorMessage)
   }
 });
 
@@ -271,8 +325,7 @@ function generateRandomString() {
 
 function emailLookUP(email){
   for(user in users){
-    // console.log(user)
-    // console.log(`The user's email is ${users[user].email} and email to compare ${email}`)
+    
     if(users[user].email === email){
       return true
     }
