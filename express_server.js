@@ -1,5 +1,9 @@
 const express = require("express");
 const cookieSession = require('cookie-session')
+const helperFunctions = require('./helper')
+const {urlDatabase, users} = require('./appData')
+const {generateRandomString, emailLookUP, getUserId, getAuthorizesURLs} = helperFunctions(users, urlDatabase)
+
 const bcrypt = require('bcryptjs')
 
 
@@ -15,32 +19,6 @@ app.use(cookieSession({
 }))
 
 
-
-//=========== Application sample Data=========
-
-const urlDatabase = {
-  b6UTxQ: {
-      longURL: "https://www.tsn.ca",
-      userID: "aJ48lW"
-  },
-  i3BoGr: {
-      longURL: "https://www.google.ca",
-      userID: "aJ48lW"
-  }
-};
-
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
 
 // ======= Routes ===========
 app.get("/", (req, res) => {
@@ -126,8 +104,6 @@ app.get("/urls/new", (req, res) => {
   } else {
     const user_cookie = req.session.user_id;
     const user = users[user_cookie];
-    console.log(user_cookie)
-    console.log(user)
     const templateVars = {
       user
     };
@@ -262,7 +238,6 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.get('/login', (req, res) => {
   const user_cookie = req.session.user_id 
-  console.log(user_cookie)
   const user = users[user_cookie];
   const templateVars = {
     user
@@ -326,43 +301,7 @@ app.get("/fetch", (req, res) => {
   res.send(`a = ${a}`);
 });
 
-
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-
-// Helper functions
-
-function generateRandomString() {
-  return Math.random().toString(36).substr(2, 6);
-}
-
-function emailLookUP(email){
-  for(user in users){
-    
-    if(users[user].email === email){
-      return true
-    }
-  }
-  return false
-}
-
-function getUserId(email){
-  for(user in users){
-    if(users[user].email === email){
-      return users[user].id
-    }
-  }
-}
-
-function getAuthorizesURLs(userID){
-  const authorizedURLs = {}
-  for(url in urlDatabase){
-    if(urlDatabase[url]['userID'] === userID){
-      authorizedURLs[url] = urlDatabase[url]
-    }
-  }
-  return authorizedURLs
-}
