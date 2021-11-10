@@ -1,6 +1,14 @@
 // ======== Helper functions ===========
 const helperFunctions = (usersDB, urlDB) => {
 
+  function getUserByEmail(email) {
+    for(user in usersDB){
+      if(usersDB[user].email === email){
+        return usersDB[user]
+      }
+    }
+  }
+
   function generateRandomString() {
     return Math.random().toString(36).substr(2, 6);
   }
@@ -23,7 +31,7 @@ const helperFunctions = (usersDB, urlDB) => {
     }
   }
   
-  function getAuthorizesURLs(userID){
+  function urlsForUser(userID){
     const authorizedURLs = {}
     for(url in urlDB){
       if(urlDB[url]['userID'] === userID){
@@ -33,7 +41,7 @@ const helperFunctions = (usersDB, urlDB) => {
     return authorizedURLs
   }
 
-  return {generateRandomString, emailLookUP, getUserId, getAuthorizesURLs}
+  return {generateRandomString, emailLookUP, getUserId, urlsForUser, getUserByEmail}
 
 }
 

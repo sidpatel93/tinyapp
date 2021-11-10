@@ -7,7 +7,7 @@ const urlDatabase = {
   },
   i3BoGr: {
       longURL: "https://www.google.ca",
-      userID: "aJ48lW"
+      userID: "aI98lW"
   }
 };
 
@@ -21,6 +21,11 @@ const users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
+  },
+  "aJ48lW": {
+    id: "aJ48lW",
+    email: "sample@example.com",
+    password: "monkeyFuzz"
   }
 };
 

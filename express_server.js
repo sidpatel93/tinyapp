@@ -1,8 +1,8 @@
 const express = require("express");
 const cookieSession = require('cookie-session')
-const helperFunctions = require('./helper')
 const {urlDatabase, users} = require('./appData')
-const {generateRandomString, emailLookUP, getUserId, getAuthorizesURLs} = helperFunctions(users, urlDatabase)
+const helperFunctions = require('./helper')
+const {generateRandomString, emailLookUP, getUserId, urlsForUser, getUserByEmail} = helperFunctions(users, urlDatabase)
 
 const bcrypt = require('bcryptjs')
 
@@ -136,7 +136,7 @@ app.get("/urls", (req, res) => {
   //Check if the user is logged in
   if(req.session.user_id in users){
    
-    const authorizedURLs = getAuthorizesURLs(user_cookie)
+    const authorizedURLs = urlsForUser(user_cookie)
     
     const templateVars = {
       urls: authorizedURLs,
@@ -182,7 +182,7 @@ app.post("/urls", (req, res) => {
 app.post('/urls/:id', (req, res) => {
   
   const user_cookie = req.session.user_id;
-  const authorizedURLs = getAuthorizesURLs(user_cookie)
+  const authorizedURLs = urlsForUser(user_cookie)
   const shortURL = req.params.id;
   const longURL = req.body.newLongURL;
 
@@ -213,7 +213,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.post('/urls/:id/delete', (req, res) => {
   // check if the user has authorize to delete the url by comparing user cookie with the authorized urls
   const user_cookie = req.session.user_id;
-  const authorizedURLs = getAuthorizesURLs(user_cookie)
+  const authorizedURLs = urlsForUser(user_cookie)
   const shortURL = req.params.id;
   
   if(shortURL in authorizedURLs){
