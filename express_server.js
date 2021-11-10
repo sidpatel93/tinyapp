@@ -19,8 +19,8 @@ app.use(cookieSession({
 }))
 
 
+// ======= Home route ===========
 
-// ======= Routes ===========
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
 //======== User Registration route ========
 
 app.get("/register", (req, res) => {
-  //const user_cookie = req.cookies.user_id;
+  
   const user_cookie = req.session.user_id 
   const user = users[user_cookie];
   const templateVars = {
@@ -39,21 +39,18 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   //get the user info from the registration page
-  const newUser = req.body;
-  
-  
-  if(!newUser.email || !newUser.password){
-    
+  const {email, password} = req.body
+  // If email or password field is empty then redirect to error page
+  if(!email || !password){
     const errorMessage = {
       errorTitle: "Invalid values",
       errorDescription: "Email and Password can not be empty, Please try to register again.",
       route: "register"
     }
     res.status(400).render("error_page",errorMessage)
-    
   }
-
-  else if(emailLookUP(newUser.email)){
+  // If email already exist in the data then redirect to error page
+  else if(emailLookUP(email)){
     const errorMessage = {
       errorTitle: "Invalid values",
       errorDescription: "Email already exist, please try another valid email address to register or login with existing email.",
@@ -65,14 +62,12 @@ app.post("/register", (req, res) => {
   else {
   //create the userid
   const userId = generateRandomString();
-  
   //hash the password
-  const password = req.body['password']
   const hashedPass = bcrypt.hashSync(password, 10)
   // save the info in the users object.
   users[userId] = {
     id: userId,
-    email: req.body['email'],
+    email: email,
     password: hashedPass
   };
   // set the userid cookie.
@@ -92,7 +87,6 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls/new", (req, res) => {
   // check if the user is logged in or not if not then redirect to login page
    
-
   if(!req.session.user_id){
     
     const errorMessage = {
@@ -128,8 +122,6 @@ app.get("/urls/:shortURL", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  
-  //const user_cookie = req.cookies.user_id;
   const user_cookie = req.session.user_id
   const user = users[user_cookie];
 
@@ -137,7 +129,6 @@ app.get("/urls", (req, res) => {
   if(req.session.user_id in users){
    
     const authorizedURLs = urlsForUser(user_cookie)
-    
     const templateVars = {
       urls: authorizedURLs,
       user
