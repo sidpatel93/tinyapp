@@ -1,48 +1,48 @@
 // ======== Helper functions ===========
 const helperFunctions = (usersDB, urlDB) => {
 
-  function getUserByEmail(email) {
-    for(user in usersDB){
-      if(usersDB[user].email === email){
-        return usersDB[user]
+  const getUserByEmail = (email) => {
+    for (let user in usersDB) {
+      if (usersDB[user].email === email) {
+        return usersDB[user];
       }
     }
-  }
+  };
 
-  function generateRandomString() {
+  const generateRandomString = () => {
     return Math.random().toString(36).substr(2, 6);
-  }
+  };
   
-  function emailLookUP(email){
-    for(user in usersDB){
+  const emailLookUP = (email) => {
+    for (let user in usersDB) {
       
-      if(usersDB[user].email === email){
-        return true
+      if (usersDB[user].email === email) {
+        return true;
       }
     }
-    return false
-  }
+    return false;
+  };
   
-  function getUserId(email){
-    for(user in usersDB){
-      if(usersDB[user].email === email){
-        return usersDB[user].id
+  const getUserId = (email) => {
+    for (let user in usersDB) {
+      if (usersDB[user].email === email) {
+        return usersDB[user].id;
       }
     }
-  }
+  };
   
-  function urlsForUser(userID){
-    const authorizedURLs = {}
-    for(url in urlDB){
-      if(urlDB[url]['userID'] === userID){
-        authorizedURLs[url] = urlDB[url]
+  const urlsForUser = (userID) => {
+    const authorizedURLs = {};
+    for (let url in urlDB) {
+      if (urlDB[url]['userID'] === userID) {
+        authorizedURLs[url] = urlDB[url];
       }
     }
-    return authorizedURLs
-  }
+    return authorizedURLs;
+  };
 
-  return {generateRandomString, emailLookUP, getUserId, urlsForUser, getUserByEmail}
+  return {generateRandomString, emailLookUP, getUserId, urlsForUser, getUserByEmail};
 
-}
+};
 
-module.exports = helperFunctions
+module.exports = helperFunctions;
