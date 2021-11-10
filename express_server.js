@@ -11,11 +11,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
 
-// Application Data
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
+//=========== Application Data=========
 
 const urlDatabase = {
   b6UTxQ: {
@@ -41,7 +37,7 @@ const users = {
   }
 };
 
-// Routes
+// ======= Routes ===========
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -91,8 +87,6 @@ app.post("/register", (req, res) => {
     email: req.body['email'],
     password: req.body['password']
   };
-  //console.log the user object & inspect the cookie to see the change
-  //console.log(users);
   // set the userid cookie.
   res.cookie('user_id', userId);
   //redirect to /urls page
@@ -187,11 +181,11 @@ app.post("/urls", (req, res) => {
     const longURL = req.body['longURL'];
 
     // add the shortURL - longURL paris in the database
-    //console.log(shortURL)
+    
     urlDatabase[shortURL] = {}
     urlDatabase[shortURL]['longURL'] = longURL;
     urlDatabase[shortURL]['userID'] = user_cookie
-    //console.log(urlDatabase)
+    
     res.redirect(`/urls/${shortURL}`);
   }
 });
@@ -265,7 +259,7 @@ app.get('/login', (req, res) => {
 
 app.post('/login',(req, res) => {
   const user = req.body;
-  //console.log(user)
+  
   // check if the user exist in the database
   
   if(emailLookUP(user.email)){
@@ -295,7 +289,7 @@ app.get('/logout',(req, res) => {
   res.redirect('/urls');
 });
 
-
+// ====== Test routes ============
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
