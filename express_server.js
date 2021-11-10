@@ -1,20 +1,19 @@
 const express = require("express");
-const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session')
 const bcrypt = require('bcryptjs')
-//const bodyParser = require('body-parser')
+
 
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
-//app.use (bodyParser.urlencoded({extended: true}))
+
 app.use(express.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'user_id',
   keys: ['4nimal4Life']
 }))
-//app.use(cookieParser());
+
 
 
 //=========== Application Data=========
@@ -63,10 +62,10 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   //get the user info from the registration page
   const newUser = req.body;
-  //console.log("newUser", newUser)
+  
   
   if(!newUser.email || !newUser.password){
-    //console.log("email or password empty")
+    
     const errorMessage = {
       errorTitle: "Invalid values",
       errorDescription: "Email and Password can not be empty, Please try to register again.",
@@ -99,7 +98,6 @@ app.post("/register", (req, res) => {
     password: hashedPass
   };
   // set the userid cookie.
-  //res.cookie('user_id', userId);
   req.session.user_id = userId
   //redirect to /urls page
   res.redirect('urls');
@@ -118,7 +116,7 @@ app.get("/urls/new", (req, res) => {
    
 
   if(!req.session.user_id){
-    //res.redirect('/login')
+    
     const errorMessage = {
       errorTitle: "Unauthorized access",
       errorDescription: "You need to be logged in to perform this action, Please login with valid credentials and try again ",
@@ -163,7 +161,7 @@ app.get("/urls", (req, res) => {
   if(req.session.user_id in users){
    
     const authorizedURLs = getAuthorizesURLs(user_cookie)
-    //console.log(authorizedURLs)
+    
     const templateVars = {
       urls: authorizedURLs,
       user
@@ -263,7 +261,6 @@ app.post('/urls/:id/delete', (req, res) => {
 //======== Login and Logout routes ========
 
 app.get('/login', (req, res) => {
-  //const user_cookie = req.cookies.user_id;
   const user_cookie = req.session.user_id 
   console.log(user_cookie)
   const user = users[user_cookie];
@@ -295,10 +292,7 @@ app.post('/login',(req, res) => {
       res.render('error_page', errorMessage)
     }
     else {
-    //res.cookie("user_id", userID);
-    //console.log(req.session)
     req.session.user_id = userID
-    //console.log(req.session.user_id)
     res.redirect('/urls');
     }
   }
@@ -313,7 +307,6 @@ app.post('/login',(req, res) => {
 });
 
 app.get('/logout',(req, res) => {
-  //res.clearCookie("user_id");
   req.session = null
   res.redirect('/urls');
 });
