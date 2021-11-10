@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs')
 //const bodyParser = require('body-parser')
 
 const app = express();
@@ -81,12 +82,17 @@ app.post("/register", (req, res) => {
   else {
   //create the userid
   const userId = generateRandomString();
+  
+  //hash the password
+  const password = req.body['password']
+  const hashedPass = bcrypt.hashSync(password, 10)
   // save the info in the users object.
   users[userId] = {
     id: userId,
     email: req.body['email'],
-    password: req.body['password']
+    password: hashedPass
   };
+  console.log(users)
   // set the userid cookie.
   res.cookie('user_id', userId);
   //redirect to /urls page
@@ -264,10 +270,18 @@ app.post('/login',(req, res) => {
   
   if(emailLookUP(user.email)){
     const userID = getUserId(user.email)
-    //console.log(userID)
+    
+    //get compare the hashed password with the password
+    const passwordTocompare = user.password
+    const hashedPass = users[userID]['password']
 
-    if(users[userID]['password'] !== user.password){
-      res.status(403).send('Email and Password does not match')
+    if(!bcrypt.compareSync(passwordTocompare,hashedPass)){
+      const errorMessage = {
+        errorTitle: "Invalid Credentials",
+        errorDescription: "Email and Password does not match, please try login again",
+        route: "login"
+      }
+      res.render('error_page', errorMessage)
     }
     else {
     res.cookie("user_id", userID);
