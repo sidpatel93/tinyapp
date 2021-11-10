@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const bcrypt = require('bcryptjs')
 //const bodyParser = require('body-parser')
 
@@ -9,7 +10,11 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 //app.use (bodyParser.urlencoded({extended: true}))
 app.use(express.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'user_id',
+  keys: ['4nimal4Life']
+}))
+//app.use(cookieParser());
 
 
 //=========== Application Data=========
@@ -46,7 +51,8 @@ app.get("/", (req, res) => {
 //======== User Registration route ========
 
 app.get("/register", (req, res) => {
-  const user_cookie = req.cookies.user_id;
+  //const user_cookie = req.cookies.user_id;
+  const user_cookie = req.session.user_id 
   const user = users[user_cookie];
   const templateVars = {
     user
@@ -92,9 +98,9 @@ app.post("/register", (req, res) => {
     email: req.body['email'],
     password: hashedPass
   };
-  console.log(users)
   // set the userid cookie.
-  res.cookie('user_id', userId);
+  //res.cookie('user_id', userId);
+  req.session.user_id = userId
   //redirect to /urls page
   res.redirect('urls');
 }
@@ -111,7 +117,7 @@ app.get("/urls/new", (req, res) => {
   // check if the user is logged in or not if not then redirect to login page
    
 
-  if(!req.cookies.user_id){
+  if(!req.session.user_id){
     //res.redirect('/login')
     const errorMessage = {
       errorTitle: "Unauthorized access",
@@ -120,8 +126,10 @@ app.get("/urls/new", (req, res) => {
     }
     res.status(403).render("error_page",errorMessage)
   } else {
-    const user_cookie = req.cookies.user_id;
+    const user_cookie = req.session.user_id;
     const user = users[user_cookie];
+    console.log(user_cookie)
+    console.log(user)
     const templateVars = {
       user
     };
@@ -131,7 +139,7 @@ app.get("/urls/new", (req, res) => {
 
 
 app.get("/urls/:shortURL", (req, res) => {
-  const user_cookie = req.cookies.user_id;
+  const user_cookie = req.session.user_id;
   const user = users[user_cookie];
 
   const shortURL = req.params.shortURL
@@ -147,11 +155,12 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/urls", (req, res) => {
   
-  const user_cookie = req.cookies.user_id;
+  //const user_cookie = req.cookies.user_id;
+  const user_cookie = req.session.user_id
   const user = users[user_cookie];
 
   //Check if the user is logged in
-  if(user_cookie in users){
+  if(req.session.user_id in users){
    
     const authorizedURLs = getAuthorizesURLs(user_cookie)
     //console.log(authorizedURLs)
@@ -169,7 +178,7 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   
   // Add validation to check the user is logged in
-  const user_cookie = req.cookies.user_id;
+  const user_cookie = req.session.user_id;
   const user = users[user_cookie];
 
   if(!user_cookie){
@@ -198,7 +207,7 @@ app.post("/urls", (req, res) => {
 
 app.post('/urls/:id', (req, res) => {
   
-  const user_cookie = req.cookies.user_id;
+  const user_cookie = req.session.user_id;
   const authorizedURLs = getAuthorizesURLs(user_cookie)
   const shortURL = req.params.id;
   const longURL = req.body.newLongURL;
@@ -229,7 +238,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.post('/urls/:id/delete', (req, res) => {
   // check if the user has authorize to delete the url by comparing user cookie with the authorized urls
-  const user_cookie = req.cookies.user_id;
+  const user_cookie = req.session.user_id;
   const authorizedURLs = getAuthorizesURLs(user_cookie)
   const shortURL = req.params.id;
   
@@ -254,7 +263,9 @@ app.post('/urls/:id/delete', (req, res) => {
 //======== Login and Logout routes ========
 
 app.get('/login', (req, res) => {
-  const user_cookie = req.cookies.user_id;
+  //const user_cookie = req.cookies.user_id;
+  const user_cookie = req.session.user_id 
+  console.log(user_cookie)
   const user = users[user_cookie];
   const templateVars = {
     user
@@ -267,7 +278,7 @@ app.post('/login',(req, res) => {
   const user = req.body;
   
   // check if the user exist in the database
-  
+
   if(emailLookUP(user.email)){
     const userID = getUserId(user.email)
     
@@ -284,7 +295,10 @@ app.post('/login',(req, res) => {
       res.render('error_page', errorMessage)
     }
     else {
-    res.cookie("user_id", userID);
+    //res.cookie("user_id", userID);
+    //console.log(req.session)
+    req.session.user_id = userID
+    //console.log(req.session.user_id)
     res.redirect('/urls');
     }
   }
@@ -299,7 +313,8 @@ app.post('/login',(req, res) => {
 });
 
 app.get('/logout',(req, res) => {
-  res.clearCookie("user_id");
+  //res.clearCookie("user_id");
+  req.session = null
   res.redirect('/urls');
 });
 
