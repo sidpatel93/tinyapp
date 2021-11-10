@@ -34,5 +34,3 @@ TinyApp is a full stack web application built with Node and Express that allows 
 ## Getting Started
 
 After running the development server using `node express_server.js` command, you can access the application on `localhost:8080/`. If logged in, the home page will show all the short URLs you have created or redirect to Login page if not logged in.  
-
-A new user can register for an account using `Register` tab on the navigation bar. 
