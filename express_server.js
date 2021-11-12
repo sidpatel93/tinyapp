@@ -30,6 +30,9 @@ app.get("/", (req, res) => {
 app.get("/register", (req, res) => {
   
   const userCookie = req.session.user_id;
+  if(userCookie){
+    res.redirect("/urls")
+  }
   const user = users[userCookie];
   const templateVars = {
     user
@@ -85,13 +88,8 @@ app.get("/urls/new", (req, res) => {
   // check if the user is logged in or not if not then redirect to login page
    
   if (!req.session.user_id) {
-    
-    const errorMessage = {
-      errorTitle: "Unauthorized access",
-      errorDescription: "You need to be logged in to perform this action, Please login with valid credentials and try again ",
-      route: "login"
-    };
-    res.status(403).render("error_page",errorMessage);
+
+    res.status(403).redirect("/login");
   } else {
     const userCookie = req.session.user_id;
     const user = users[userCookie];
@@ -162,7 +160,12 @@ app.get("/urls", (req, res) => {
     };
     res.render("urls_index", templateVars);
   } else {
-    res.status(403).redirect("/login");
+    const errorMessage = {
+      errorTitle: "Unauthorized access",
+      errorDescription: "You need to be logged in to perform this action, Please login with valid credentials and try again ",
+      route: "login"
+    };
+    res.status(403).render("error_page",errorMessage);
   }
 });
 
@@ -268,6 +271,9 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.get('/login', (req, res) => {
   const userCookie = req.session.user_id;
+  if(userCookie){
+    res.redirect("/urls")
+  }
   const user = users[userCookie];
   const templateVars = {
     user
